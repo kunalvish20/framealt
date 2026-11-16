@@ -1,0 +1,16 @@
+import { NextRequest } from 'next/server';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { authorized,bad,fail,HttpError,isUuid,json,mustEdit,r2,r2Bucket,supabaseAdmin } from '@/lib/server';
+export const runtime='nodejs';
+export async function POST(req:NextRequest){
+ try{
+  const {db}=await authorized(req);const b=await json(req);bad(isUuid(b.assetId),'Invalid asset ID');
+  const {data:asset}=await db.from('assets').select('project_id').eq('id',b.assetId).single();if(!asset)throw new HttpError(404,'Asset not found');
+  await mustEdit(db,asset.project_id);
+  const {data:versions}=await db.from('asset_versions').select('storage_key,status,upload_id,source_provider').eq('asset_id',b.assetId);
+  if(versions?.some(v=>v.status==='uploading'))throw new HttpError(409,'Finish or cancel active upload first.');
+  for(const v of versions||[])if((v.source_provider||'r2')==='r2')await r2().send(new DeleteObjectCommand({Bucket:r2Bucket(),Key:v.storage_key}));
+  const {error}=await supabaseAdmin().from('assets').delete().eq('id',b.assetId);if(error)throw error;
+  return Response.json({ok:true});
+ }catch(e){return fail(e);}
+}
