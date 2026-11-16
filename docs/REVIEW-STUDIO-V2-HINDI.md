@@ -47,7 +47,8 @@ npm install
 npm run dev
 ```
 
-- `http://localhost:3000` — Projects
+- `http://localhost:3000` — public homepage
+- `http://localhost:3000/dashboard` — login ke baad Projects dashboard
 - `http://localhost:3000/drive` — Google Drive files
 - Projects → chosen project — Files Grid
 - Video card click → Video Review

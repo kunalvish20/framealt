@@ -8,10 +8,11 @@ export default function LoginPage(){
  useEffect(()=>{
   if(!isConfigured())return;
   const recovery=new URLSearchParams(window.location.search).get('reset')==='1'||window.location.hash.includes('type=recovery');
+  if(new URLSearchParams(window.location.search).get('signup')==='1')setMode('register');
   if(recovery)setMode('reset');
   const afterSignIn=async(session:import('@supabase/supabase-js').Session|null)=>{
    if(!session)return;
-   if(!new URLSearchParams(window.location.search).has('google')){router.replace('/');return;}
+   if(!new URLSearchParams(window.location.search).has('google')){router.replace('/dashboard');return;}
    if(googleHandled.current)return;googleHandled.current=true;
    let result='needs-connect';
    if(session.provider_token){
@@ -39,8 +40,8 @@ export default function LoginPage(){
   const sb=supabaseBrowser();
   if(mode==='reset'){const {error}=await sb.auth.updateUser({password});if(error)throw error;await sb.auth.signOut();setPassword('');setMode('login');setNotice('Password updated. Sign in with your new password.');}
   else if(mode==='forgot'){const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:`${window.location.origin}/login?reset=1`});if(error)throw error;setNotice('Password reset link sent. Check your inbox.');}
-  else if(mode==='register'){if(!name.trim())throw new Error('Enter your name.');const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name.trim()}}});if(error)throw error;if(data.session)router.replace('/');else setNotice('Account created! Confirm your email, then sign in.');}
-  else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;router.replace('/');router.refresh();}
+  else if(mode==='register'){if(!name.trim())throw new Error('Enter your name.');const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name.trim()}}});if(error)throw error;if(data.session)router.replace('/dashboard');else setNotice('Account created! Confirm your email, then sign in.');}
+  else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;router.replace('/dashboard');router.refresh();}
  }catch(err){setError(err instanceof Error?err.message:'Login failed');}finally{setBusy(false);}}
  return <div className="auth-layout"><div className="auth-brand-panel"><div className="login-brand"><span className="brand-symbol"><Film size={22}/></span> FreeFrame<span className="brand-cloud">cloud</span></div><div className="auth-pitch"><div className="eyebrow-light">THE CREATIVE REVIEW WORKSPACE</div><h1>Great work<br/>deserves <em>great<br/>feedback.</em></h1><p>Upload your work. Share with your team. Collect feedback on the exact moment that matters.</p><div className="auth-feature"><span><Layers3 size={19}/></span><div><b>Frame-precise review</b><small>Every comment, at the right moment</small></div></div><div className="auth-feature"><span><Cloud size={19}/></span><div><b>Files stay on your cloud</b><small>Private Cloudflare R2 storage</small></div></div><div className="auth-feature"><span><ShieldCheck size={19}/></span><div><b>Secure collaboration</b><small>Supabase authentication & permissions</small></div></div></div><div className="auth-footnote">Your creative workflow. Your infrastructure.</div></div>
   <div className="auth-form-panel"><div className="auth-form-wrap"><div className="mobile-login-brand"><Film size={22}/> FreeFrame cloud</div><div className="auth-welcome">{mode==='login'?'Welcome back':mode==='register'?'Create an account':mode==='reset'?'Set a new password':'Reset password'}</div><h2>{mode==='login'?'Sign in to your workspace':mode==='register'?'Start collaborating':mode==='reset'?'Choose your new password':'Forgot your password?'}</h2><p className="auth-sub">{mode==='login'?'Enter your account details to continue.':mode==='register'?'Your creative work, all in one place.':mode==='reset'?'Enter a new secure password for your account.':'We’ll email you a link to reset it.'}</p>
