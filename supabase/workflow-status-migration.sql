@@ -13,3 +13,4 @@ create index if not exists freeframe_assets_workflow_status_idx
   on public.assets(project_id, workflow_status);
 -- Existing project-members SELECT policy reads this column. Writes are only
 -- performed by the server route after checking owner/editor membership.
+A

@@ -34,13 +34,14 @@ export default function VideoScrubber({ src, playerRef, currentTime, onTimeChang
     if (!preview || hoverTime === null) return;
     // A short throttle lets the preview play smoothly while following the pointer.
     const seekPreview = () => {
-      if (Math.abs(preview.currentTime - hoverTime) > 0.3) preview.currentTime = hoverTime;
+      if (preview.readyState >= 1 && Math.abs(preview.currentTime - hoverTime) > 0.3) preview.currentTime = hoverTime;
       lastPreviewSeek.current = performance.now();
     };
     const delay = Math.max(0, 90 - (performance.now() - lastPreviewSeek.current));
     const timer = delay ? window.setTimeout(seekPreview, delay) : null;
     if (!delay) seekPreview();
-    void preview.play().catch(() => {});
+    // Seek a paused preview; never start a second streaming player on pointermove.
+    preview.pause();
     return () => { if (timer !== null) window.clearTimeout(timer); };
   }, [hoverTime]);
 

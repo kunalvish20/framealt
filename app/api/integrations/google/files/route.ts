@@ -25,10 +25,11 @@ export async function GET(req:NextRequest) {
       corpora:(view==='all'||!!search)?'allDrives':'user',
     };
     if(page)params.pageToken=page;
-    const response=await googleApi(user.id, 'files', params);
+    const [response,currentFolder]=await Promise.all([
+      googleApi(user.id, 'files', params),
+      !search&&folder!=='root'?googleFile(user.id,folder):Promise.resolve(null),
+    ]);
     const body=await response.json() as {nextPageToken?:string;incompleteSearch?:boolean;files:GoogleFile[]};
-    let currentFolder:GoogleFile | null=null;
-    if(!search&&folder!=='root') currentFolder=await googleFile(user.id,folder);
     return Response.json({files:body.files||[],nextPageToken:body.nextPageToken||null,incompleteSearch:!!body.incompleteSearch,folder:currentFolder}, {headers:{'Cache-Control':'no-store'}});
   } catch(e){return fail(e);}
 }

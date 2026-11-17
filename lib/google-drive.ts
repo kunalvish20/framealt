@@ -97,7 +97,16 @@ export async function saveGoogleTokens(userId: string, token: GoogleToken) {
   if (error) throw new HttpError(500, `Could not save Google connection. Run migration SQL. (${error.code || 'database'})`);
   return { email: identity.email, googleSub: identity.sub };
 }
+const tokenRequests = new Map<string, Promise<string>>();
 export async function googleAccessToken(userId: string): Promise<string> {
+  const existing = tokenRequests.get(userId);
+  if (existing) return existing;
+  const request = refreshAccessToken(userId);
+  tokenRequests.set(userId, request);
+  try { return await request; }
+  finally { if (tokenRequests.get(userId) === request) tokenRequests.delete(userId); }
+}
+async function refreshAccessToken(userId: string): Promise<string> {
   const connection = await readConnection(userId);
   if (!connection) throw new HttpError(409, 'Connect a Google Drive account first.');
   if (Date.parse(connection.expires_at) - Date.now() > 90_000) return unseal<{token:string}>(connection.access_token_encrypted, 'google-access').token;

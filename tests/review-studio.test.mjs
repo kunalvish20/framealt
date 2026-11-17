@@ -16,7 +16,8 @@ test('timecoded markup is per-version and saved with authenticated/guest comment
  assert.match(page,/setDraftMarks/);assert.match(page,/annotation:draftMarks\.length/);
  assert.match(page,/c\.annotation/);assert.match(page,/assetVersions/);
  const share=read('app/share/[token]/page.tsx');
- assert.match(share,/annotation:marks\.length/);assert.match(share,/MarkupLayer/);
+ assert.match(share,/annotation:marks\.length/);assert.match(share,/ReviewPlayer/);
+ assert.match(read('components/review/ReviewPlayer.tsx'),/MarkupLayer/);
  const api=read('app/api/public-share/[token]/comment/route.ts');
  assert.match(api,/validReviewMarks\(body.annotation\)/);
  assert.match(api,/throttle_share_comment/);

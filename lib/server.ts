@@ -7,10 +7,13 @@ function required(name: string): string {
   if (!value || value.startsWith('YOUR_') || value.includes('YOUR-PROJECT')) throw new Error(`Missing ${name}. Set it in .env.local.`);
   return value;
 }
+let adminClient: SupabaseClient | null = null;
+let storageClient: S3Client | null = null;
 export function supabaseAdmin(): SupabaseClient {
-  return createClient(required('NEXT_PUBLIC_SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY'), {
+  if (!adminClient) adminClient = createClient(required('NEXT_PUBLIC_SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY'), {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  return adminClient;
 }
 export async function authorized(req: NextRequest): Promise<{ db: SupabaseClient; user: User }> {
   const header = req.headers.get('authorization') || '';
@@ -33,12 +36,13 @@ export function bad(condition: unknown, message: string): asserts condition {
   if (!condition) throw new HttpError(400, message);
 }
 export function r2(): S3Client {
-  return new S3Client({
+  if (!storageClient) storageClient = new S3Client({
     region: 'auto',
     endpoint: `https://${required('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId: required('R2_ACCESS_KEY_ID'), secretAccessKey: required('R2_SECRET_ACCESS_KEY') },
     forcePathStyle: true,
   });
+  return storageClient;
 }
 export function r2Bucket() { return required('R2_BUCKET'); }
 export async function mustEdit(db: SupabaseClient, projectId: string) {
