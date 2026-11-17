@@ -20,7 +20,7 @@ export async function GET(req:NextRequest) {
       : view==='starred' ? 'starred = true and trashed = false'
       : `'root' in parents and trashed = false`;
     const params:Record<string,string>={
-      q, fields:'nextPageToken,incompleteSearch,files(id,name,mimeType,size,modifiedTime,webViewLink,parents,description)',
+      q, fields:'nextPageToken,incompleteSearch,files(id,name,mimeType,size,createdTime,modifiedTime,webViewLink,parents,description)',
       pageSize:'100', orderBy:'folder,name', supportsAllDrives:'true', includeItemsFromAllDrives:'true',
       corpora:(view==='all'||!!search)?'allDrives':'user',
     };

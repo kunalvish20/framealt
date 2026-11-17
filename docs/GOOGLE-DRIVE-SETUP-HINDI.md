@@ -61,7 +61,8 @@ npm run dev
 5. **Review destination** project select karo → Video/image/audio file par **Link to review** click karo.
 6. Project open karo → video par play/pause, timestamp comment, approve/change request, version attach, team member, secure guest review link.
 7. Project mein **Google Drive** button ya version toolbar mein cloud icon se directly import kar sakte ho. New version ke liye same media kind choose karo.
-8. **Disconnect** karne par Google files delete nahi hongi; linked file playback connection restore hone tak unavailable rahega.
+8. Ek Drive folder ke sab videos ko ek version stack banana ho to folder kholo, review destination select karo, aur **Import folder videos as versions** dabao. Drive `createdTime` ke ascending order mein V1, V2, V3 assign honge. Naya video add hone par isi button ko dobara dabao; already linked videos duplicate nahi honge aur naya video next version banega. Is action ke liye folder ko manually resync karna padta hai.
+9. **Disconnect** karne par Google files delete nahi hongi; linked file playback connection restore hone tak unavailable rahega.
 
 ## 5. File behaviour
 

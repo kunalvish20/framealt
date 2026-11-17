@@ -116,6 +116,9 @@
 .drive-tabs button.active { color: var(--ink); border-bottom-color: var(--purple); }
 .drive-files-panel { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .drive-path { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.drive-folder-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.drive-folder-actions .btn { white-space: nowrap; }
+@media (max-width: 700px) { .drive-path { align-items: flex-start; flex-wrap: wrap; } .drive-folder-actions { width: 100%; justify-content: space-between; } }
 .drive-path small { color: var(--subtle); font-size: 11px; }
 .drive-crumbs, .drive-crumbs span { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 .drive-crumbs { color: var(--muted); font-size: 12px; }

@@ -135,7 +135,7 @@ export async function googleApi(userId: string, path: string, params: Record<str
   return response;
 }
 export type GoogleFile = {
-  id: string; name: string; mimeType: string; size?: string; modifiedTime?: string;
+  id: string; name: string; mimeType: string; size?: string; createdTime?: string; modifiedTime?: string;
   webViewLink?: string; thumbnailLink?: string; parents?: string[]; description?: string; videoMediaMetadata?: { durationMillis?: string|number };
 };
 export function driveKind(mime: string): 'video' | 'audio' | 'image' | null {

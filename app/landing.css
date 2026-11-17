@@ -54,7 +54,7 @@
 .diagram-decisions span:first-child { display: flex; gap: 4px; align-items: center; color: var(--success); }
 .diagram-footer { border-top: 1px solid var(--line); font-size: 10px; }
 .landing-features { padding: 56px 0 88px; }
-.landing-section-intro { display: flex; align-items: end; justify-content: space-between; gap: 48px; margin-bottom: 48px; }
+.landing-section-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; margin-bottom: 48px; }
 .landing-section-intro h2, .landing-workflow h2, .landing-sharing-heading h2 { font-size: clamp(32px,3.6vw,47px); line-height: 1.14; letter-spacing: -1.9px; font-weight: 500; margin: 0; }
 .landing-section-intro h2 span { color: var(--muted); }
 .landing-section-intro > p { max-width: 290px; margin: 0 0 5px; color: var(--muted); font-size: 13px; line-height: 1.8; }
@@ -75,7 +75,7 @@
 .version-explanation h3 { font-size: 13px; margin: 1px 0 6px; font-weight: 500; }
 .version-explanation p { font-size: 12px; color: var(--subtle); line-height: 1.65; margin: 0; }
 .landing-sharing { padding: 88px 0 72px; }
-.landing-sharing-heading { display: flex; align-items: end; justify-content: space-between; gap: 64px; margin-bottom: 44px; }
+.landing-sharing-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 64px; margin-bottom: 44px; }
 .landing-sharing-heading > p { max-width: 360px; color: var(--muted); font-size: 13px; line-height: 1.8; margin-bottom: 0; }
 .landing-access-options { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); overflow: hidden; }
 .landing-access-options article { padding: 30px; background: var(--surface); }

@@ -41,6 +41,12 @@ export async function POST(req:NextRequest) {
       const {data:asset}=await db.from('assets').select('id,project_id,kind,current_version').eq('id',body.assetId).eq('project_id',body.projectId).single();
       if(!asset)throw new HttpError(404,'Asset not found');
       if(asset.kind!==kind)throw new HttpError(400,'A new version must use the same media type.');
+      const {data:linked,error:linkedError}=await admin.from('asset_versions').select('id')
+        .eq('asset_id',asset.id).eq('source_provider','google_drive')
+        .eq('external_owner_id',user.id).eq('external_file_id',file.id)
+        .eq('status','ready').limit(1);
+      if(linkedError)throw new HttpError(500,'Unable to check whether this file is already a version.');
+      if(linked?.length)return Response.json({ok:true,alreadyLinked:true,assetId:asset.id,versionId:linked[0].id,name:file.name,source:'google_drive'});
       const {data:pending}=await db.from('asset_versions').select('id').eq('asset_id',asset.id).eq('status','uploading').limit(1);
       if(pending?.length)throw new HttpError(409,'Wait until the current upload finishes.');
       assetId=asset.id;version=asset.current_version+1;

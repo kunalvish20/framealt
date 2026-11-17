@@ -56,4 +56,5 @@ test('Google Drive import reopens existing asset instead of duplicating version'
  assert.match(api,/alreadyLinked:true/);
  assert.match(api,/if\(!body\.assetId\)/);
  assert.match(api,/eq\('project_id',body\.projectId\)/);
+ assert.match(api,/eq\('asset_id',asset\.id\)/);
 });
