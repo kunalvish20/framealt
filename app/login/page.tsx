@@ -106,7 +106,7 @@ export default function LoginPage() {
     <div className="auth-brand-panel"><Link href="/" className="login-brand"><span className="brand-symbol"><Film size={18}/></span>FreeFrame</Link>
       <div className="auth-pitch"><h1>Media review.<br/><em>Every detail,<br/>in context.</em></h1><p>Bring files, versions, and feedback together in one focused workspace.</p>
         <div className="auth-feature"><span><Layers3 size={18}/></span><div><b>Keep every version</b><small>Feedback and decisions stay with the right cut</small></div></div>
-        <div className="auth-feature"><span><Cloud size={18}/></span><div><b>Connect your media</b><small>Upload to R2 or link from Google Drive</small></div></div>
+        <div className="auth-feature"><span><Cloud size={18}/></span><div><b>Connect your media</b><small>Upload video to Mux or link from Google Drive</small></div></div>
         <div className="auth-feature"><span><ShieldCheck size={18}/></span><div><b>Control review access</b><small>Project roles and expiring guest links</small></div></div>
       </div><div className="auth-footnote">Video, images, and audio. One review workflow.</div>
     </div>

@@ -1,33 +1,36 @@
 import { NextRequest } from 'next/server';
-import { CompleteMultipartUploadCommand, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { authorized,bad,fail,HttpError,isUuid,json,mustEdit,r2,r2Bucket,supabaseAdmin } from '@/lib/server';
-import { MAX_PARTS } from '@/lib/limits';
+import { authorized, bad, fail, HttpError, isUuid, json, mustEdit } from '@/lib/server';
+import { finalizeMuxAsset, discardMuxUpload } from '@/lib/mux-finalize';
+import { deleteMuxAsset, getMuxAsset, getMuxUpload } from '@/lib/mux';
 export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
- try {
-  const {db,user}=await authorized(req); const b=await json(req);
-  bad(isUuid(b.versionId),'Invalid version ID');
-  const {data:v}=await db.from('asset_versions').select('*,assets(project_id,current_version)').eq('id',b.versionId).single();
-  if(!v||v.status!=='uploading'||v.created_by!==user.id) throw new HttpError(404,'Pending upload not found');
-  const asset = v.assets as {project_id:string;current_version:number};
-  await mustEdit(db,asset.project_id);
-  if(v.upload_id){
-   bad(Array.isArray(b.parts) && b.parts.length > 1 && b.parts.length <= MAX_PARTS,'Missing multipart parts');
-   const parts = b.parts.map((p: {partNumber:number;etag:string})=>({PartNumber:p.partNumber,ETag:p.etag}));
-   bad(parts.every((p:{PartNumber:number;ETag:string},i:number)=>Number.isInteger(p.PartNumber)&&p.PartNumber===i+1&&typeof p.ETag==='string'&&/^"?[a-zA-Z0-9-]+"?$/.test(p.ETag)),'Invalid multipart ETags');
-   await r2().send(new CompleteMultipartUploadCommand({Bucket:r2Bucket(),Key:v.storage_key,UploadId:v.upload_id,MultipartUpload:{Parts:parts}}));
-  }
-  let head;
-  try { head=await r2().send(new HeadObjectCommand({Bucket:r2Bucket(),Key:v.storage_key})); }
-  catch { throw new HttpError(409,'Upload not found in R2. Please retry.'); }
-  if(head.ContentLength!==v.size_bytes) {
-   await r2().send(new DeleteObjectCommand({Bucket:r2Bucket(),Key:v.storage_key})).catch(()=>{});
-   throw new HttpError(409,'File size verification failed. Upload rejected.');
-  }
-  const admin=supabaseAdmin();
-  const {error}=await admin.from('asset_versions').update({status:'ready',upload_id:null}).eq('id',v.id).eq('status','uploading');
-  if(error) throw error;
-  await admin.from('assets').update({current_version:Math.max(asset.current_version,v.version)}).eq('id',v.asset_id).lt('current_version',v.version);
-  return Response.json({ok:true,versionId:v.id,assetId:v.asset_id});
- } catch(e) { return fail(e); }
+  try {
+    const { db, user } = await authorized(req);
+    const body = await json(req);
+    bad(isUuid(body.versionId), 'Invalid version ID');
+    const { data: version } = await db.from('asset_versions')
+      .select('id,asset_id,status,upload_id,source_provider,created_by,assets(project_id)')
+      .eq('id', body.versionId).single();
+    if (!version || version.source_provider !== 'mux' || version.created_by !== user.id) throw new HttpError(404, 'Mux upload not found');
+    await mustEdit(db, (version.assets as unknown as { project_id: string }).project_id);
+    if (version.status === 'ready') return Response.json({ ok: true, ready: true });
+    if (!version.upload_id) throw new HttpError(409, 'Mux upload has no upload ID.');
+    const upload = await getMuxUpload(version.upload_id);
+    if (['errored', 'cancelled', 'timed_out'].includes(upload.status)) {
+      const discarded = await discardMuxUpload(version.id);
+      if (discarded && upload.asset_id) await deleteMuxAsset(upload.asset_id).catch(() => {});
+      throw new HttpError(409, upload.error?.message || 'Mux upload failed. Please retry.');
+    }
+    if (upload.status !== 'asset_created' || !upload.asset_id) return Response.json({ ok: true, ready: false });
+    const asset = await getMuxAsset(upload.asset_id);
+    if (asset.status === 'errored') {
+      const discarded = await discardMuxUpload(version.id);
+      if (discarded) await deleteMuxAsset(asset.id).catch(() => {});
+      throw new HttpError(409, asset.errors?.messages?.[0] || 'Mux could not process this video.');
+    }
+    if (asset.status !== 'ready') return Response.json({ ok: true, ready: false });
+    const ready = await finalizeMuxAsset(version.id, asset);
+    return Response.json({ ok: true, ready });
+  } catch (error) { return fail(error); }
 }

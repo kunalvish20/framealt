@@ -1,6 +1,6 @@
 # FreeFrame × Google Drive — Complete setup (Hinglish)
 
-Is implementation mein **Google login + read-only Google Drive access + project review** integrate hua hai. Google Drive media ko Cloudflare R2 par dobara upload nahi karna padta. Supabase mein comments / approvals / memberships / versions ki metadata store hoti hai. Drive owner connection disconnect kare ya file permission revoke kare to linked media playback band ho jayega.
+Is implementation mein **Google login + read-only Google Drive access + project review** integrate hua hai. Google Drive media ko Mux ya R2 par dobara upload nahi karna padta. Supabase mein comments / approvals / memberships / versions ki metadata store hoti hai. Drive owner connection disconnect kare ya file permission revoke kare to linked media playback band ho jayega.
 
 ## 1. Database (sirf first-time)
 
@@ -30,7 +30,7 @@ Is implementation mein **Google login + read-only Google Drive access + project 
 
 ## 3. Environment variables
 
-`.env.example` copy karke `.env.local` banao. Purane Supabase + R2 credentials ke saath ye 4 Google fields fill karo:
+`.env.example` copy karke `.env.local` banao. Supabase credentials ke saath ye 4 Google fields fill karo. Mux credentials direct video upload ke liye alag se chahiye:
 
 ```dotenv
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -45,7 +45,7 @@ Security key generator (terminal):
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-Output jo mile use `GOOGLE_TOKEN_ENCRYPTION_KEY` mein paste karo. Is key ko change karne par existing Google tokens decrypt nahi honge aur users ko reconnect karna hoga. **Cloudflare + Supabase secret keys `NEXT_PUBLIC_` ke saath kabhi nahi rakho.**
+Output jo mile use `GOOGLE_TOKEN_ENCRYPTION_KEY` mein paste karo. Is key ko change karne par existing Google tokens decrypt nahi honge aur users ko reconnect karna hoga. **Mux + Supabase secret keys `NEXT_PUBLIC_` ke saath kabhi nahi rakho.**
 
 ## 4. Run and try
 
@@ -67,7 +67,7 @@ npm run dev
 ## 5. File behaviour
 
 - **Google Docs / Sheets / Slides, PDFs, ZIP, folders** library mein dikhte hain; review ke liye direct import **sirf browser-compatible video / audio / image** supported hai. Docs ko **View** se Google Drive mein khol sakte ho.
-- **Google Drive origin file** Drive mein hi rehta hai; linked review metadata Supabase mein hai. Cloudflare R2 ab bhi separately uploaded assets ke liye optional/active storage hai.
+- **Google Drive origin file** Drive mein hi rehta hai; linked review metadata Supabase mein hai. Naye direct video uploads Mux par jaate hain; R2 sirf purane uploaded assets ke liye hai.
 - **Google Drive editor/owner permissions** app supersede nahi kar sakta. Owner file delete / permission remove kare to preview fail ho sakta hai.
 - Playback backend proxy pe byte ranges use karta hai; Google download quotas, browser codecs aur hosting provider ki transfer/time limits apply hongi. MP4 (H.264/AAC) browser playback ke liye practical hai. **High-volume 4K / large-video serving ke liye streaming-capable Node host and transcoding/CDN pipeline needed.**
 - MEGA ka **Google jaisa same OAuth flow is edition mein ready nahi hai**. MEGA account/file API + decrypting SDK integration alag build, provider approvals aur review workflow validation maangta hai. Current UI MEGA connected hone ka claim nahi karti.
@@ -77,5 +77,5 @@ npm run dev
 - Google OAuth publishing / restricted-scope verification and (if applicable) third-party security assessment complete karo.
 - Verified HTTPS domain, privacy policy, data deletion instructions, token revocation / disconnect UX, server logging redaction, provider rate limits, WAF, data retention policy set karo.
 - Google consent **Testing** mode ka refresh token expire ho sakta hai (Google may limit to 7 days), so demo users ko reconnect karna padega.
-- Supabase project's Google provider settings, Google redirect URIs, `.env.local` production origin, R2 CORS and Supabase Redirect URLs synchronize karo.
+- Supabase project's Google provider settings, Google redirect URIs, `.env.local` production origin, Mux webhook URL and Supabase Redirect URLs synchronize karo.
 - **We have not run live OAuth/Drive requests**, because this ZIP contains placeholders and no Google or Supabase credentials were provided. Run the integration end-to-end with a test Google account before production.

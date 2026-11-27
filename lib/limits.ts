@@ -1,1 +1,1 @@
-export { SMALL_UPLOAD_THRESHOLD, MULTIPART_PART_SIZE, MAX_UPLOAD_BYTES, MAX_PARTS, ALLOWED_MIME_PREFIXES, uploadKind, validUpload } from './limits.mjs';
+export { MAX_UPLOAD_BYTES, ALLOWED_MIME_PREFIXES, uploadKind, validUpload } from './limits.mjs';

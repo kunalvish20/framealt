@@ -8,6 +8,7 @@ import { supabaseBrowser } from '@/lib/supabase-browser';
 import { clearClientCaches } from '@/lib/client-cache.mjs';
 import { initials, readableError } from '@/lib/utils';
 import Dialog from '@/components/ui/Dialog';
+import UploadActivity from '@/components/UploadActivity';
 import type { User } from '@supabase/supabase-js';
 
 export default function AppShell({ children, user, topAction }: { children: React.ReactNode; user: User; topAction?: React.ReactNode }) {
@@ -48,6 +49,7 @@ export default function AppShell({ children, user, topAction }: { children: Reac
     <main className="main-area" id="workspace-content" tabIndex={-1}>
       <header className="topbar"><div className="topbar-leading"><button className="icon-btn mobile-menu-toggle" onClick={() => setDrawer(true)} aria-label="Open navigation"><Menu size={20}/></button><div className="crumb"><span>Workspace</span><ChevronRight size={12}/><strong>{path === '/drive' ? 'Google Drive' : path === '/dashboard' ? 'Projects' : 'Project files'}</strong></div></div><div className="topbar-actions">{topAction}</div></header>
       {children}
+      <UploadActivity userId={user.id}/>
     </main>
     {drawer && <Dialog open title="Workspace navigation" onClose={() => setDrawer(false)} className="navigation-drawer"><div className="modal-top"><strong>Navigation</strong><button className="icon-btn" onClick={() => setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div><div className="sidebar">{navigation()}</div></Dialog>}
   </div>;

@@ -15,7 +15,7 @@ export function AuthGate({ children }: { children: (user: User) => React.ReactNo
     if (isConfigured() && !loading && !session && !error) router.replace('/login');
   }, [loading, session, error, router]);
 
-  if (!isConfigured()) return <div className="setup-page"><Film size={48}/><h1>Connect your services</h1><p>Configure your Supabase credentials in <code>.env.local</code>, run the migrations in the README, then restart the server. R2 is optional for Google Drive-only workflows.</p><a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="btn btn-primary">Open Supabase</a></div>;
+  if (!isConfigured()) return <div className="setup-page"><Film size={48}/><h1>Connect your services</h1><p>Configure your Supabase credentials in <code>.env.local</code>, run the migrations in the README, then restart the server. Mux is used for direct video uploads; Google Drive links remain available.</p><a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="btn btn-primary">Open Supabase</a></div>;
   if (error) return <div className="setup-page"><h1>Connection interrupted</h1><p role="alert">{error}</p><button className="btn btn-primary" onClick={retry}>Try again</button></div>;
   if (loading || !session) return <WorkspaceSkeleton/>;
   return <>{children(session.user)}</>;

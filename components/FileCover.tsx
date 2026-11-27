@@ -30,9 +30,9 @@ function FileCover({ kind, version }: { kind: string; version: Version | undefin
   useEffect(() => {
     let active = true;
     setThumbnail('');
-    if (!visible || !versionId || !userId || (provider !== 'google_drive' && kind !== 'image')) return;
+    if (!visible || !versionId || !userId || (provider !== 'google_drive' && provider !== 'mux' && kind !== 'image')) return;
     void thumbnailCache.load<string>(key, async () => {
-      if (provider === 'google_drive') {
+      if (provider === 'google_drive' || provider === 'mux') {
         const { url } = await authFetch(`/api/media/thumbnail?versionId=${encodeURIComponent(versionId)}`);
         if (url) return url;
       }

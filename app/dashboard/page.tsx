@@ -57,7 +57,7 @@ function Dashboard({ user }: { user: User }) {
       let sum = 0;
       for (let offset = 0; ; offset += 1000) {
         const { data, error: queryError } = await supabaseBrowser().from('asset_versions').select('id,size_bytes')
-          .eq('status', 'ready').or('source_provider.eq.r2,source_provider.is.null').order('id').range(offset, offset + 999);
+          .eq('status', 'ready').or('source_provider.eq.mux,source_provider.eq.r2,source_provider.is.null').order('id').range(offset, offset + 999);
         if (queryError) throw queryError;
         sum += (data || []).reduce((total, version) => total + Number(version.size_bytes || 0), 0);
         if (!data || data.length < 1000) break;
@@ -94,8 +94,8 @@ function Dashboard({ user }: { user: User }) {
           <span>{project.assets?.[0]?.count ?? '—'}</span><span className="project-member-col">{project.project_members?.[0]?.count ?? '—'}</span><span>{dateFormat.format(new Date(project.updated_at))}</span><ArrowRight size={15}/>
         </Link>) : search ? <EmptyState icon={Search} title="No matching projects" action={<button className="btn btn-secondary" onClick={() => setSearch('')}>Clear search</button>}>Try a different project name or description.</EmptyState> : <EmptyState icon={FolderOpen} title="Create your first project" action={<button className="btn btn-primary" onClick={() => setCreating(true)}><Plus size={16}/> New project</button>}>Organize your media and invite collaborators to review it.</EmptyState>}
       </div>
-      <div className="project-totals" aria-live="polite"><span><FolderKanban size={13}/><b>{loading ? '—' : projects.length}</b> projects</span><span><Video size={13}/><b>{loading ? '—' : totals.assets}</b> media assets</span><span><Users size={13}/><b>{loading ? '—' : totals.members}</b> memberships</span><span><HardDrive size={13}/><b>{totalSize === null ? '—' : fmtBytes(totalSize)}</b> R2 storage</span></div>
-      <div className="index-footer"><Cloud size={14}/> Uploaded media stays in private R2 storage. Linked media stays in Google Drive.</div>
+      <div className="project-totals" aria-live="polite"><span><FolderKanban size={13}/><b>{loading ? '—' : projects.length}</b> projects</span><span><Video size={13}/><b>{loading ? '—' : totals.assets}</b> media assets</span><span><Users size={13}/><b>{loading ? '—' : totals.members}</b> memberships</span><span><HardDrive size={13}/><b>{totalSize === null ? '—' : fmtBytes(totalSize)}</b> uploaded files</span></div>
+      <div className="index-footer"><Cloud size={14}/> New uploaded videos stream privately from Mux. Linked media stays in Google Drive.</div>
     </div>
     {creating && <Dialog open title="Create a project" onClose={() => setCreating(false)} busy={saving}><form onSubmit={event => void createProject(event)}><div className="modal-top"><span className="modal-icon"><FolderKanban size={20}/></span><button type="button" disabled={saving} className="icon-btn" onClick={() => setCreating(false)} aria-label="Close create project"><X size={19}/></button></div><h2>Create a project</h2><p className="page-description">A space for your files and collaborators.</p><label>Project name<input autoFocus required maxLength={140} value={title} onChange={event => setTitle(event.target.value)} placeholder="Project name"/></label><label>Description (optional)<textarea maxLength={3000} value={description} onChange={event => setDescription(event.target.value)} placeholder="Add a short description" rows={3}/></label>{createError && <div className="message error" role="alert">{createError}</div>}<div className="modal-actions"><button type="button" className="btn btn-secondary" disabled={saving} onClick={() => setCreating(false)}>Cancel</button><button disabled={!title.trim() || saving} className="btn btn-primary">{saving ? <Loader2 size={16} className="rotating"/> : <Plus size={16}/>} {saving ? 'Creating…' : 'Create project'}</button></div></form></Dialog>}
   </AppShell>;

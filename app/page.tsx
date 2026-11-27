@@ -3,7 +3,7 @@ import { ArrowDown, ArrowRight, Check, CheckCircle2, ChevronRight, Cloud, FileVi
 import './landing.css';
 
 const capabilities = [
-  { icon: FileVideo, title: 'Bring your media', text: 'Upload video, images, and audio to private R2 storage, or link files directly from Google Drive.' },
+  { icon: FileVideo, title: 'Bring your media', text: 'Upload videos to private Mux streaming, or link media directly from Google Drive.' },
   { icon: MessageCircle, title: 'Review in context', text: 'Leave timecoded comments, draw on the media, and discuss changes in threaded replies.' },
   { icon: CheckCircle2, title: 'Keep decisions clear', text: 'Request changes or approve a version. Revisit feedback without losing the history.' },
 ];

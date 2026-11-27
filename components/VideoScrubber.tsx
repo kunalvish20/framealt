@@ -5,12 +5,13 @@ import { fmtTime } from '@/lib/utils';
 
 type Props = {
   src: string;
+  source?: string;
   playerRef: React.RefObject<HTMLVideoElement | null>;
   currentTime: number;
   onTimeChange: (time: number) => void;
 };
 
-export default function VideoScrubber({ src, playerRef, currentTime, onTimeChange }: Props) {
+export default function VideoScrubber({ src, source, playerRef, currentTime, onTimeChange }: Props) {
   const [duration, setDuration] = useState(0);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const previewRef = useRef<HTMLVideoElement | null>(null);
@@ -31,7 +32,7 @@ export default function VideoScrubber({ src, playerRef, currentTime, onTimeChang
 
   useEffect(() => {
     const preview = previewRef.current;
-    if (!preview || hoverTime === null) return;
+    if (!preview || hoverTime === null || source === 'mux') return;
     // A short throttle lets the preview play smoothly while following the pointer.
     const seekPreview = () => {
       if (preview.readyState >= 1 && Math.abs(preview.currentTime - hoverTime) > 0.3) preview.currentTime = hoverTime;
@@ -43,7 +44,7 @@ export default function VideoScrubber({ src, playerRef, currentTime, onTimeChang
     // Seek a paused preview; never start a second streaming player on pointermove.
     preview.pause();
     return () => { if (timer !== null) window.clearTimeout(timer); };
-  }, [hoverTime]);
+  }, [hoverTime, source]);
 
   function updateHover(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType === 'touch' || duration <= 0) return;
@@ -76,7 +77,7 @@ export default function VideoScrubber({ src, playerRef, currentTime, onTimeChang
         onChange={event => seek(Number(event.target.value))}
       />
       {hoverTime !== null && <div className="ff-video-hover-card" style={{ left: `clamp(88px, ${hoverProgress}%, calc(100% - 88px))` }}>
-        <video ref={previewRef} src={src} muted playsInline preload="metadata" aria-hidden="true" />
+        {source !== 'mux' && <video ref={previewRef} src={src} muted playsInline preload="metadata" aria-hidden="true" />}
         <span>{fmtTime(hoverTime)}</span>
       </div>}
     </div>

@@ -38,7 +38,7 @@ GOOGLE_CLIENT_SECRET=YOUR_PRIVATE_CLIENT_SECRET
 GOOGLE_TOKEN_ENCRYPTION_KEY=YOUR_RANDOM_32_PLUS_CHAR_SECRET
 ```
 
-R2 env only if direct local media uploads needed, otherwise Google Drive-linked videos don't require R2. No Docker required.
+Mux env values are needed for direct video uploads; Google Drive-linked media does not require Mux. R2 env values are only for legacy R2 assets. No Docker required.
 
 ## Run
 
@@ -61,7 +61,7 @@ npm run dev
 4. Video card open karo, review player mein sahi version select karo.
 5. Video 00:13 par pause karo, pen/arrow/circle/pin tool select karke draw karo, comment type kar ke **Post** dabao. Markup comment ke saath store hoga.
 6. Editor ko invite: `Team` button → existing FreeFrame user email → `Editor`; invitee ke paas account banana zaroori hai.
-7. Next cut V2: Review top toolbar `+` → direct R2 upload (R2 enabled ho) OR Google Drive cloud icon → V2 link. New version pe old comments automatically copy nahi hote; old versions dropdown se accessible hain.
+7. Next cut V2: Review top toolbar `+` → direct Mux video upload (Mux enabled ho) OR Google Drive cloud icon → V2 link. New version pe old comments automatically copy nahi hote; old versions dropdown se accessible hain.
 8. Private access: `Public / Private share` → Copy private link. Invitee ko project member hona padega; private project membership grants project-wide review access.
 9. Public client link: `Public / Private share` → expiration & guest-comment toggle → Create secure link. Guest comment/markup editor ko same version par dikhega. Active share revoke bhi kar sakte ho.
 10. Files Grid ke **Status** sidebar mein label search/select karo to matching files dikhenge. Owner/editor file card ke status button se Needs Review, In Progress, Approved, Attention, Discard, Uploaded ya custom label set kar sakte hain. Viewer filter dekh sakta hai, status badal nahi sakta. "Use review decision" se manual label remove hota hai; per-version approval decisions alag rehte hain.
