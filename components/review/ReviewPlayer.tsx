@@ -27,6 +27,7 @@ type Props = {
 
 export default function ReviewPlayer({ versionId, name, kind, size, source, shareToken, playerRef, draftMarks, onMarksChange, tool, focusedComment, onPositionChange }: Props) {
   const mediaRef = useRef<HTMLMediaElement | null>(null);
+  const nativeMuxPlayback = useRef(false);
   const stage = useRef<HTMLDivElement>(null);
   const [time, setTime] = useState(0);
   const [natural, setNatural] = useState({ width: 16, height: 9 });
@@ -37,15 +38,19 @@ export default function ReviewPlayer({ versionId, name, kind, size, source, shar
     if (source !== 'mux' || kind !== 'video' || !media.url) return;
     const video = playerRef.current;
     if (!video) return;
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = media.url;
-      return () => { video.removeAttribute('src'); video.load(); };
-    }
+    nativeMuxPlayback.current = false;
     let cancelled = false;
     let hls: import('hls.js').default | null = null;
     void import('hls.js').then(({ default: Hls }) => {
       if (cancelled) return;
-      if (!Hls.isSupported()) { media.reportError('This browser cannot play Mux streaming video. Try an updated browser.'); return; }
+      if (!Hls.isSupported()) {
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          nativeMuxPlayback.current = true;
+          video.src = media.url;
+          video.load();
+        } else media.reportError('This browser cannot play Mux streaming video. Try an updated browser.');
+        return;
+      }
       hls = new Hls();
       let recovered = false;
       hls.on(Hls.Events.ERROR, (_event, detail) => {
@@ -60,7 +65,7 @@ export default function ReviewPlayer({ versionId, name, kind, size, source, shar
       hls.attachMedia(video);
       hls.loadSource(media.url);
     }).catch(() => { if (!cancelled) media.reportError('Video player could not load. Check your connection and retry.'); });
-    return () => { cancelled = true; hls?.destroy(); };
+    return () => { cancelled = true; hls?.destroy(); if (nativeMuxPlayback.current) { video.removeAttribute('src'); video.load(); nativeMuxPlayback.current = false; } };
   }, [source, kind, media.url, playerRef]);
 
   useEffect(() => {
@@ -81,7 +86,7 @@ export default function ReviewPlayer({ versionId, name, kind, size, source, shar
   return <>
     <div className="preview-stage ff-preview-stage" ref={stage} aria-busy={!!versionId && !media.url}>
       {media.url ? kind === 'audio' ? <div className="audio-preview"><FileAudio size={56} strokeWidth={1}/><b>{name}</b><audio key={versionId} ref={element => { mediaRef.current = element; }} src={media.url} controls preload="metadata" onLoadedMetadata={media.restore} onError={media.onError} onTimeUpdate={event => setTime(event.currentTarget.currentTime)} onPause={event => onPositionChange(event.currentTarget.currentTime)} onSeeked={event => onPositionChange(event.currentTarget.currentTime)}/></div> : <div className={`ff-media-surface ${kind === 'image' ? 'ff-image-surface' : ''}`} style={{ width, height }}>
-        {kind === 'video' ? <video key={versionId} ref={bindVideo} className="review-video" src={source === 'mux' ? undefined : media.url} controls playsInline preload="metadata" aria-label={name || 'Review video'} onLoadedMetadata={event => { const element = event.currentTarget; if (element.videoWidth && element.videoHeight) setNatural({ width: element.videoWidth, height: element.videoHeight }); media.restore(); }} onTimeUpdate={event => setTime(event.currentTarget.currentTime)} onPause={event => onPositionChange(event.currentTarget.currentTime)} onSeeked={event => onPositionChange(event.currentTarget.currentTime)} onError={event => { const code = event.currentTarget.error?.code; if (code === 3 || code === 4) media.reportError('Your browser could not decode this video. Try another browser or re-upload a supported video.'); else media.onError(); }}/> : <img key={versionId} className="review-image" src={media.url} alt={name || 'Review image'} onLoad={event => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} onError={media.onError}/>}
+        {kind === 'video' ? <video key={versionId} ref={bindVideo} className="review-video" src={source === 'mux' ? undefined : media.url} controls playsInline preload="metadata" aria-label={name || 'Review video'} onLoadedMetadata={event => { const element = event.currentTarget; if (element.videoWidth && element.videoHeight) setNatural({ width: element.videoWidth, height: element.videoHeight }); media.restore(); }} onCanPlay={media.clearError} onPlaying={media.clearError} onTimeUpdate={event => setTime(event.currentTarget.currentTime)} onPause={event => onPositionChange(event.currentTarget.currentTime)} onSeeked={event => onPositionChange(event.currentTarget.currentTime)} onError={event => { if (source === 'mux' && !nativeMuxPlayback.current) return; const code = event.currentTarget.error?.code; if (code === 3 || code === 4) media.reportError('Your browser could not decode this video. Try another browser or re-upload a supported video.'); else media.onError(); }}/> : <img key={versionId} className="review-image" src={media.url} alt={name || 'Review image'} onLoad={event => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} onError={media.onError}/>}
         <MarkupLayer marks={[...savedMarks, ...draftMarks]} onChange={marks => onMarksChange(marks.slice(savedMarks.length))} tool={tool}/>
       </div> : <div className="empty-viewer"><div>{versionId ? <Loader2 size={36} className="rotating"/> : <Film size={52} strokeWidth={1}/>}</div><h3>{versionId ? 'Loading secure media…' : 'No file selected'}</h3><p>{versionId ? 'Preparing your private preview.' : 'Select a file to start reviewing.'}</p></div>}
       {media.error && <div className="media-error" role="alert"><p>{media.error}</p><button className="btn btn-secondary" onClick={media.retry}>Retry media</button></div>}

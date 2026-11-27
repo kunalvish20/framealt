@@ -68,5 +68,5 @@ export function useSignedMedia(versionId: string | null, mediaRef: MediaRef, sha
     element.currentTime = Number.isFinite(element.duration) ? Math.min(previous.time, element.duration) : previous.time;
     if (previous.playing) void element.play().catch(() => {});
   }, [mediaRef]);
-  return { url, error, restore, retry: () => setAttempt(value => value + 1), onError: () => renewal.current?.(), reportError: (message: string) => setError(message) };
+  return { url, error, restore, retry: () => setAttempt(value => value + 1), onError: () => renewal.current?.(), reportError: (message: string) => setError(message), clearError: () => setError('') };
 }
